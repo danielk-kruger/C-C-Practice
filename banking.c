@@ -14,41 +14,43 @@ typedef struct {
 } BankAccount;
 
 size_t len(BankAccount accounts[]) {
-    return sizeof(accounts) / sizeof(accounts[0]) + 1;
+    return sizeof(accounts) / sizeof(BankAccount);
 }
 
-int searchAccount(BankAccount accounts[], int acc_number) {
-    for (int i = 0; i < len(accounts); i++)
+int searchAccount(BankAccount accounts[], int acc_number, int counter) {
+    for (int i = 0; i < counter; i++)
         if (accounts[i].account_number == acc_number)
             return i;
     
     return -1;
 }
 
-int validateAccount(BankAccount accounts[]) {
+int validateAccount(BankAccount accounts[], int counter) {
     int acc_number;
 
     printf("Please login with your bank number to continue: \n");
     printf("=>  ");
     scanf("%d", &acc_number);
+    getchar();
 
-    int index = searchAccount(accounts, acc_number);
-    return index > 0 ? index : -1;
+    return searchAccount(accounts, acc_number, counter);
 }
 
-void createAccount(BankAccount accounts[]) {
+void createAccount(BankAccount accounts[], int *counter) {
     int generated_number = rand() % 5999 + 1000;
-    printf("\nlength of accounts array: %d", len(accounts));
-    accounts[len(accounts)].account_number = generated_number;
-    printf("\nYour Account Number:  %d\n\n", generated_number);
+
+    printf("\nlength of accounts array: %d", *counter);
+    accounts[*counter].account_number = generated_number;
+    printf("\nYour Account Number:  %d\n\n", accounts[*counter].account_number);
 
     printf("\nEnter your account name:  ");
-    scanf("%s", &accounts[len(accounts)].account_holder);
+    scanf("%s", &accounts[*counter].account_holder);
 
     printf("\nEnter your initial balance:  ");
-    scanf("%f", &accounts[len(accounts)].balance);
+    scanf("%f", &accounts[*counter].balance);
 
     printf("\nAccount created Successfully\n");
+    (*counter)++;
 }
 
 void deposit(BankAccount account) {
@@ -112,6 +114,7 @@ void start_system(BankAccount account) {
 
 int main() {
     BankAccount accounts[ACCOUNT_ARRAY_LIMIT];
+    int counter = len(accounts);
     int acc_number;
     int current_attempts = 0;
     // bool isLoggedIn = false;
@@ -130,9 +133,9 @@ int main() {
         switch (initial_option) {
             case 1:
                 while (current_attempts <= MAX_LOGIN_ATTEMPS) {
-                    int index = validateAccount(accounts);
+                    int index = validateAccount(accounts, counter);
 
-                    if (index > 0) {
+                    if (index >= 0) {
                         printf("\nLogin Successful!\n");
                         start_system(accounts[index]);
                         break;
@@ -146,7 +149,10 @@ int main() {
                 }
                 break;
             case 2:
-                createAccount(accounts);
+                createAccount(accounts, &counter);
+                for (int i = 0; i < counter; i++) {
+                    printf("\nAccount Holder: %s\n", accounts[i].account_holder);
+                }
                 break;
         }
         
